@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: library-management-system
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library_db
+    username: ${DB_USERNAME:library_user}
+    password: ${DB_PASSWORD:library_pass}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-secret-key-min-256-bits-long-for-hs256-algorithm}
+      expiration: 86400000 # 24 hours
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    com.library: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/library_db
