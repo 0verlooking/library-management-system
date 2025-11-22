@@ -112,7 +112,7 @@ public class AuthController {
         user.setLastName(registerRequest.getLastName());
         user.setRole(User.UserRole.READER); // За замовчуванням роль READER
         user.setStatus(User.UserStatus.ACTIVE);
-        user.setMaxBooksAllowed(5);
+        user.setMaxLoans(5);
 
         userRepository.save(user);
 
