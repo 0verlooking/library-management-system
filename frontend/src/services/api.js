@@ -12,6 +12,11 @@ const api = axios.create({
 // Додати interceptor для автоматичного додавання JWT токену до кожного запиту
 api.interceptors.request.use(
   (config) => {
+    // Не додавати токен до auth endpoints
+    if (config.url && config.url.startsWith('/auth')) {
+      return config;
+    }
+
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
@@ -33,9 +38,12 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Якщо отримали 401 (Unauthorized), видалити токен та перенаправити на логін
+      // Якщо отримали 401 (Unauthorized), видалити токен
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Перенаправити на логін тільки якщо не на сторінці логіну
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
