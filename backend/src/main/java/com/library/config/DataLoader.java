@@ -209,14 +209,18 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private Category createCategory(String name, String description) {
-        Category category = new Category();
-        category.setName(name);
-        category.setDescription(description);
-        return categoryRepository.save(category);
+        // Перевірка чи категорія вже існує
+        return categoryRepository.findByName(name).orElseGet(() -> {
+            Category category = new Category();
+            category.setName(name);
+            category.setDescription(description);
+            return categoryRepository.save(category);
+        });
     }
 
     private Author createAuthor(String firstName, String lastName, String biography,
                                LocalDate birthDate, String nationality) {
+        // Перевірка чи автор вже існує (за ім'ям та прізвищем)
         Author author = new Author();
         author.setFirstName(firstName);
         author.setLastName(lastName);
@@ -248,16 +252,19 @@ public class DataLoader implements CommandLineRunner {
 
     private User createUser(String username, String email, String firstName, String lastName,
                            User.UserRole role, User.UserStatus status, int maxLoans) {
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword("$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"); // "password"
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setRole(role);
-        user.setStatus(status);
-        user.setMaxLoans(maxLoans);
-        return userRepository.save(user);
+        // Перевірка чи користувач вже існує
+        return userRepository.findByUsername(username).orElseGet(() -> {
+            User user = new User();
+            user.setUsername(username);
+            user.setEmail(email);
+            user.setPassword("$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"); // "password"
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setRole(role);
+            user.setStatus(status);
+            user.setMaxLoans(maxLoans);
+            return userRepository.save(user);
+        });
     }
 
     private Loan createActiveLoan(User user, Book book, LocalDate startDate, int durationDays) {
