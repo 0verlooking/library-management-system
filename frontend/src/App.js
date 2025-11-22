@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import BookList from './components/BookList';
 import LoanList from './components/LoanList';
 import Login from './components/Login';
+import AdminDashboard from './components/AdminDashboard';
+import LibrarianDashboard from './components/LibrarianDashboard';
+import ReaderDashboard from './components/ReaderDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import authService from './services/authService';
 import './App.css';
@@ -20,6 +23,24 @@ function App() {
     authService.logout();
     setCurrentUser(null);
     window.location.href = '/login';
+  };
+
+  // Функція для отримання правильного dashboard в залежності від ролі
+  const getDashboard = () => {
+    if (currentUser?.role === 'ADMIN') {
+      return <AdminDashboard />;
+    } else if (currentUser?.role === 'LIBRARIAN') {
+      return <LibrarianDashboard />;
+    } else {
+      return <ReaderDashboard />;
+    }
+  };
+
+  // Отримати іконку для ролі
+  const getRoleIcon = () => {
+    if (currentUser?.role === 'ADMIN') return '👑';
+    if (currentUser?.role === 'LIBRARIAN') return '📋';
+    return '👤';
   };
 
   // Якщо користувач не автентифікований, показати тільки Login
@@ -42,14 +63,17 @@ function App() {
             <h1 className="nav-logo">📚 Бібліотека</h1>
             <ul className="nav-menu">
               <li className="nav-item">
-                <Link to="/" className="nav-link">Каталог книг</Link>
+                <Link to="/" className="nav-link">{getRoleIcon()} Головна</Link>
               </li>
               <li className="nav-item">
-                <Link to="/loans" className="nav-link">Позики</Link>
+                <Link to="/books" className="nav-link">📖 Каталог</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/loans" className="nav-link">📋 Позики</Link>
               </li>
               <li className="nav-item nav-user-info">
                 <span className="user-name">
-                  {currentUser?.username} ({currentUser?.role})
+                  {getRoleIcon()} {currentUser?.username} ({currentUser?.role})
                 </span>
               </li>
               <li className="nav-item">
@@ -65,6 +89,14 @@ function App() {
           <Routes>
             <Route
               path="/"
+              element={
+                <ProtectedRoute>
+                  {getDashboard()}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/books"
               element={
                 <ProtectedRoute>
                   <BookList />
