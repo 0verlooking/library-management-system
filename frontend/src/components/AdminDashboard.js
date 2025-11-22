@@ -23,9 +23,12 @@ function AdminDashboard() {
   const [bookForm, setBookForm] = useState({
     isbn: '',
     title: '',
-    authors: '',
+    description: '',
+    authors: '', // Буде розділено на firstName та lastName
     publisher: '',
-    publicationYear: '',
+    publishDate: '',
+    pageCount: '',
+    language: 'Українська',
     category: '',
     totalCopies: 1
   });
@@ -34,7 +37,8 @@ function AdminDashboard() {
     username: '',
     password: '',
     email: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
     role: 'READER'
   });
 
@@ -84,12 +88,39 @@ function AdminDashboard() {
     setSuccess('');
 
     try {
-      // Перетворити authors з рядка в масив
+      // Перетворити authors з рядка "Ім'я Прізвище, Ім'я Прізвище" в масив AuthorDTO
+      const authorsArray = bookForm.authors.split(',').map(authorName => {
+        const parts = authorName.trim().split(' ');
+        const firstName = parts[0] || '';
+        const lastName = parts.slice(1).join(' ') || '';
+        return {
+          firstName: firstName,
+          lastName: lastName,
+          biography: null,
+          birthDate: null,
+          nationality: null
+        };
+      });
+
+      // Створити CategoryDTO
+      const categoryObj = {
+        name: bookForm.category,
+        description: null
+      };
+
       const bookData = {
-        ...bookForm,
-        authors: bookForm.authors.split(',').map(a => a.trim()),
-        publicationYear: parseInt(bookForm.publicationYear),
-        totalCopies: parseInt(bookForm.totalCopies)
+        isbn: bookForm.isbn,
+        title: bookForm.title,
+        description: bookForm.description || null,
+        publishDate: bookForm.publishDate || null,
+        publisher: bookForm.publisher,
+        pageCount: bookForm.pageCount ? parseInt(bookForm.pageCount) : null,
+        language: bookForm.language,
+        totalCopies: parseInt(bookForm.totalCopies),
+        availableCopies: parseInt(bookForm.totalCopies),
+        status: 'AVAILABLE',
+        authors: authorsArray,
+        categories: [categoryObj]
       };
 
       await bookService.createBook(bookData);
@@ -99,9 +130,12 @@ function AdminDashboard() {
       setBookForm({
         isbn: '',
         title: '',
+        description: '',
         authors: '',
         publisher: '',
-        publicationYear: '',
+        publishDate: '',
+        pageCount: '',
+        language: 'Українська',
         category: '',
         totalCopies: 1
       });
@@ -133,6 +167,7 @@ function AdminDashboard() {
     setSuccess('');
 
     try {
+      // userForm вже має firstName та lastName
       await userService.createUser(userForm);
       setSuccess('Користувача успішно створено!');
 
@@ -141,7 +176,8 @@ function AdminDashboard() {
         username: '',
         password: '',
         email: '',
-        fullName: '',
+        firstName: '',
+        lastName: '',
         role: 'READER'
       });
 
@@ -274,14 +310,25 @@ function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label>Автори (через кому):</label>
+                <label>Опис (необов'язково):</label>
+                <textarea
+                  name="description"
+                  value={bookForm.description}
+                  onChange={handleBookChange}
+                  rows="3"
+                  placeholder="Короткий опис книги"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Автори (Ім'я Прізвище, через кому):</label>
                 <input
                   type="text"
                   name="authors"
                   value={bookForm.authors}
                   onChange={handleBookChange}
                   required
-                  placeholder="Іван Франко, Тарас Шевченко"
+                  placeholder="Тарас Шевченко, Іван Франко"
                 />
               </div>
 
@@ -293,21 +340,42 @@ function AdminDashboard() {
                   value={bookForm.publisher}
                   onChange={handleBookChange}
                   required
-                  placeholder="Видавництво"
+                  placeholder="А-БА-БА-ГА-ЛАМАГА"
                 />
               </div>
 
               <div className="form-group">
-                <label>Рік видання:</label>
+                <label>Дата видання (необов'язково):</label>
+                <input
+                  type="date"
+                  name="publishDate"
+                  value={bookForm.publishDate}
+                  onChange={handleBookChange}
+                  placeholder="2024-01-01"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Кількість сторінок (необов'язково):</label>
                 <input
                   type="number"
-                  name="publicationYear"
-                  value={bookForm.publicationYear}
+                  name="pageCount"
+                  value={bookForm.pageCount}
+                  onChange={handleBookChange}
+                  min="1"
+                  placeholder="256"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Мова:</label>
+                <input
+                  type="text"
+                  name="language"
+                  value={bookForm.language}
                   onChange={handleBookChange}
                   required
-                  min="1800"
-                  max="2025"
-                  placeholder="2024"
+                  placeholder="Українська"
                 />
               </div>
 
@@ -332,7 +400,7 @@ function AdminDashboard() {
                   onChange={handleBookChange}
                   required
                   min="1"
-                  placeholder="1"
+                  placeholder="3"
                 />
               </div>
 
@@ -397,14 +465,26 @@ function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label>Повне ім'я:</label>
+                <label>Ім'я:</label>
                 <input
                   type="text"
-                  name="fullName"
-                  value={userForm.fullName}
+                  name="firstName"
+                  value={userForm.firstName}
                   onChange={handleUserChange}
                   required
-                  placeholder="Іван Іванов"
+                  placeholder="Іван"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Прізвище:</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={userForm.lastName}
+                  onChange={handleUserChange}
+                  required
+                  placeholder="Іванов"
                 />
               </div>
 
