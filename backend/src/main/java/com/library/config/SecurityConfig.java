@@ -32,11 +32,9 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Дозволити доступ до actuator endpoints (health check)
-                .requestMatchers("/api/actuator/**").permitAll()
-                // Дозволити доступ до всіх API endpoints без автентифікації
-                .requestMatchers("/api/**").permitAll()
-                // Дозволити доступ до error endpoint
-                .requestMatchers("/error").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                // Дозволити доступ до всіх endpoints без автентифікації
+                .requestMatchers("/**").permitAll()
                 .anyRequest().permitAll()
             );
 
