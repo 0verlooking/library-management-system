@@ -84,8 +84,8 @@ public class DataLoader implements CommandLineRunner {
             320,
             "Українська",
             5,
-            Set.of(shevchenko),
-            Set.of(poetry, classics)
+            new HashSet<>(Set.of(shevchenko)),
+            new HashSet<>(Set.of(poetry, classics))
         );
 
         createBook(
@@ -97,8 +97,8 @@ public class DataLoader implements CommandLineRunner {
             256,
             "Українська",
             3,
-            Set.of(franko),
-            Set.of(prose, classics, fiction)
+            new HashSet<>(Set.of(franko)),
+            new HashSet<>(Set.of(prose, classics, fiction))
         );
 
         createBook(
@@ -110,8 +110,8 @@ public class DataLoader implements CommandLineRunner {
             192,
             "Українська",
             4,
-            Set.of(kotsiubynsky),
-            Set.of(prose, classics, fiction)
+            new HashSet<>(Set.of(kotsiubynsky)),
+            new HashSet<>(Set.of(prose, classics, fiction))
         );
 
         createBook(
@@ -123,8 +123,8 @@ public class DataLoader implements CommandLineRunner {
             128,
             "Українська",
             3,
-            Set.of(ukrainka),
-            Set.of(drama, poetry, classics)
+            new HashSet<>(Set.of(ukrainka)),
+            new HashSet<>(Set.of(drama, poetry, classics))
         );
 
         createBook(
@@ -136,8 +136,8 @@ public class DataLoader implements CommandLineRunner {
             160,
             "Українська",
             6,
-            Set.of(nechuy),
-            Set.of(prose, classics, fiction)
+            new HashSet<>(Set.of(nechuy)),
+            new HashSet<>(Set.of(prose, classics, fiction))
         );
 
         createBook(
@@ -149,8 +149,8 @@ public class DataLoader implements CommandLineRunner {
             96,
             "Українська",
             2,
-            Set.of(franko),
-            Set.of(poetry, classics)
+            new HashSet<>(Set.of(franko)),
+            new HashSet<>(Set.of(poetry, classics))
         );
 
         createBook(
@@ -162,8 +162,8 @@ public class DataLoader implements CommandLineRunner {
             224,
             "Українська",
             3,
-            Set.of(kotsiubynsky),
-            Set.of(prose, fiction)
+            new HashSet<>(Set.of(kotsiubynsky)),
+            new HashSet<>(Set.of(prose, fiction))
         );
 
         // Створення користувачів
