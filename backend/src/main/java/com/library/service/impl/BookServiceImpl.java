@@ -1,6 +1,7 @@
 package com.library.service.impl;
 
 import com.library.dto.BookDTO;
+import com.library.exception.ResourceNotFoundException;
 import com.library.mapper.BookMapper;
 import com.library.model.Book;
 import com.library.repository.BookRepository;
@@ -42,7 +43,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public BookDTO getBookById(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
         return bookMapper.toDTO(book);
     }
 
@@ -50,7 +51,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public BookDTO getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new RuntimeException("Book not found with ISBN: " + isbn));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ISBN: " + isbn));
         return bookMapper.toDTO(book);
     }
 
@@ -97,7 +98,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDTO updateBook(Long id, BookDTO bookDTO) {
         Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
 
         existingBook.setTitle(bookDTO.getTitle());
         existingBook.setIsbn(bookDTO.getIsbn());
@@ -117,7 +118,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new RuntimeException("Book not found with id: " + id);
+            throw new ResourceNotFoundException("Book not found with id: " + id);
         }
         bookRepository.deleteById(id);
     }
@@ -125,7 +126,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public void updateBookAvailability(Long bookId, int change) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
 
         int newAvailability = book.getAvailableCopies() + change;
         if (newAvailability < 0) {
