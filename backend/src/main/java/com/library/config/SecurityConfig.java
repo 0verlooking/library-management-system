@@ -45,8 +45,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Дозволені origins
-        configuration.setAllowedOrigins(Arrays.asList(
+        // Дозволені origin patterns (використовуємо patterns замість origins для credentials)
+        configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:3000",
             "http://localhost:80",
             "http://frontend:80"
