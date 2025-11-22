@@ -3,6 +3,7 @@ package com.library.config;
 import com.library.model.*;
 import com.library.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,17 +23,20 @@ public class DataLoader implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final LoanRepository loanRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DataLoader(BookRepository bookRepository,
                      AuthorRepository authorRepository,
                      CategoryRepository categoryRepository,
                      UserRepository userRepository,
-                     LoanRepository loanRepository) {
+                     LoanRepository loanRepository,
+                     PasswordEncoder passwordEncoder) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.loanRepository = loanRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -167,19 +171,19 @@ public class DataLoader implements CommandLineRunner {
         );
 
         // Створення користувачів
-        createUser("admin", "admin@library.com", "Адміністратор", "Системи",
+        createUser("admin", "admin123", "admin@library.com", "Адміністратор", "Системи",
                   User.UserRole.ADMIN, User.UserStatus.ACTIVE, 10);
 
-        createUser("librarian1", "librarian@library.com", "Олена", "Книжник",
+        createUser("librarian", "lib123", "librarian@library.com", "Олена", "Книжник",
                   User.UserRole.LIBRARIAN, User.UserStatus.ACTIVE, 10);
 
-        User reader1 = createUser("ivan_petrov", "ivan@example.com", "Іван", "Петров",
+        User reader1 = createUser("reader1", "read123", "reader1@example.com", "Іван", "Петров",
                                  User.UserRole.READER, User.UserStatus.ACTIVE, 5);
 
-        User reader2 = createUser("maria_kovalenko", "maria@example.com", "Марія", "Коваленко",
+        User reader2 = createUser("reader2", "read123", "reader2@example.com", "Марія", "Коваленко",
                                  User.UserRole.READER, User.UserStatus.ACTIVE, 5);
 
-        User reader3 = createUser("olena_shevchenko", "olena@example.com", "Олена", "Шевченко",
+        User reader3 = createUser("reader3", "read123", "reader3@example.com", "Олена", "Шевченко",
                                  User.UserRole.READER, User.UserStatus.ACTIVE, 5);
 
         // Створення тестових позик
@@ -252,14 +256,14 @@ public class DataLoader implements CommandLineRunner {
         return bookRepository.save(book);
     }
 
-    private User createUser(String username, String email, String firstName, String lastName,
+    private User createUser(String username, String password, String email, String firstName, String lastName,
                            User.UserRole role, User.UserStatus status, int maxLoans) {
         // Перевірка чи користувач вже існує
         return userRepository.findByUsername(username).orElseGet(() -> {
             User user = new User();
             user.setUsername(username);
             user.setEmail(email);
-            user.setPassword("$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"); // "password"
+            user.setPassword(passwordEncoder.encode(password)); // Кодування пароля
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setRole(role);
