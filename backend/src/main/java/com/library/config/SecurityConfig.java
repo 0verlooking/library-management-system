@@ -1,28 +1,42 @@
 package com.library.config;
 
+import com.library.security.CustomUserDetailsService;
+import com.library.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
- * Конфігурація безпеки Spring Security
- * - CORS конфігурація для взаємодії з Frontend
- * - Дозвіл на анонімний доступ до API (для демо/розробки)
+ * Конфігурація безпеки Spring Security з JWT автентифікацією
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                         JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.userDetailsService = userDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,12 +45,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Дозволити доступ до actuator endpoints (health check)
+                // Публічні endpoints (без автентифікації)
+                .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                // Дозволити доступ до всіх endpoints без автентифікації
-                .requestMatchers("/**").permitAll()
-                .anyRequest().permitAll()
-            );
+                // Всі інші endpoints вимагають автентифікації
+                .anyRequest().authenticated()
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -45,7 +61,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Дозволені origin patterns (використовуємо patterns замість origins для credentials)
+        // Дозволені origin patterns
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:3000",
             "http://localhost:80",
@@ -60,8 +76,11 @@ public class SecurityConfig {
         // Дозволені headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
 
-        // Дозволити credentials
+        // Дозволити відправку credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
+
+        // Які headers можна показувати у відповіді
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         // Максимальний час кешування preflight запиту
         configuration.setMaxAge(3600L);
@@ -70,6 +89,19 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     @Bean
