@@ -31,9 +31,13 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Дозволити доступ до actuator endpoints (health check)
+                .requestMatchers("/api/actuator/**").permitAll()
                 // Дозволити доступ до всіх API endpoints без автентифікації
                 .requestMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
+                // Дозволити доступ до error endpoint
+                .requestMatchers("/error").permitAll()
+                .anyRequest().permitAll()
             );
 
         return http.build();
