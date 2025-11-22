@@ -10,6 +10,9 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 
+# Встановлення wget для health check
+RUN apk add --no-cache wget
+
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
